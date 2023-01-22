@@ -321,10 +321,50 @@ function Topic() {
 
 
 
-### useParams
+### [useNavigate](https://reactrouter.com/en/main/hooks/use-navigate) (changement de page programmatique)
+
+```jsx
+const navigate = useNavigate();
+if(! isLogged) {
+    // Nb: le composant va être unmount à ce moment
+	navigate("/login");
+}
+```
+
+Nb: On peut vouloir l'utiliser dans un `useEffect` mais ce n'est pas nécessaire.
+
+
+
+### [useLocation](https://reactrouter.com/en/main/hooks/use-location)
+
+permet d'accéder aux informations de l'url
+
+### [useParams](https://reactrouter.com/en/main/hooks/use-params)
 
 Permet d'accéder aux paramètres de la route.
-=> son utilisation est donc très **contextuel**, le composant ne pourra **PLUS** être utilisé sans le routeur
+=> son utilisation est donc très **contextuelle**, le composant ne pourra **PLUS** être utilisé sans le routeur
+
+### [useQuery](https://v5.reactrouter.com/web/example/query-parameters)
+
+Ce n'est pas une vraie fonction the react mais un outil que l'on peut se créer
+
+```jsx
+import { useLocation } from "react-router-dom";
+
+function useQuery() {
+  const { search } = useLocation();
+
+  return React.useMemo(() => new URLSearchParams(search), [search]);
+}
+```
+
+permet d'accéder au paramètre de query (ceux après le `?`)
+E.g. `mysupersite.com?lotId=5`
+
+```jsx
+let query = useQuery();
+let lotId = Number(query.get("lotId"))
+```
 
 
 
