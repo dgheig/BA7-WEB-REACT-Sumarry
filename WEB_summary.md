@@ -415,7 +415,7 @@ C'est un moyen de partager des variables entre plusieurs composants
 ### Déclaration
 
 ```jsx
-import React, { useState, useContext } from 'react';
+import React, { useState, createContext } from 'react';
 
 // On déclare un context
 export const UserContext = createContext();
@@ -443,9 +443,9 @@ Il faut le déclarer une fois pour que les composants enfants puissent y accède
 
 ```jsx
 return (
-	<UserContext>
+	<UserProvider>
     	{/* Mettre ici les enfants devant partager le context */}
-    </UserContext>
+    </UserProvider>
 )
 ```
 
@@ -478,3 +478,148 @@ function User() {
 }
 ```
 
+
+
+
+
+## [Redux](https://redux.js.org/api/store): React Store (variables partagées dans toute l'app)
+
+```javascript
+import { createStore } from 'redux'
+const reducer = (state, action) => { // receive current state and action
+    // ...
+    return newState
+}
+const store = createStore(reducer /*, [preloadedState], [enhancer]*/)
+```
+
+* preloadedState: état initiale
+* enhancer: middlewares
+
+C'est une alternative plus simple que les contextes
+
+
+
+Méthodes de l'objet `store`
+
+* [`getState()`](https://redux.js.org/api/store#getstate): retourne l'état (ne doit pas être modifié directement)
+* [`dispatch(action)`](https://redux.js.org/api/store#dispatchaction): envoyer une action pour modifier l'état (doit correspondre au reducer qu'on a définit)
+* [`subscribe(listener)`](https://redux.js.org/api/store#subscribelistener):  le listener est une fonction qui est appelé dés qu'il y a un changement (elle ne prend aucun paramètre, **on ne sait donc pas ce qui a été modifié**).
+  => très lourd, à éviter
+* [`replaceReducer(nextReducer)`](https://redux.js.org/api/store#replacereducernextreducer): à éviter
+
+
+
+# Express
+
+## Créer un projet 
+
+```bash
+mkdir myapp && cd myapp &&  npm init --yes
+```
+
+ça va créer le strict minimum
+
+
+
+```bash
+npm install --save express body-parser cors nodemon
+npm install @babel/core @babel/node @babel/preset-env
+```
+
+
+
+On peut modifier le fichier **package.json** 
+
+```json
+{
+  "name": "myapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  
+  // Ajouter le type "module" pour utiliser les imports ES6 
+  "type": "module",
+  "scripts": {
+    // Ajouter les 2 commandes ci-dessous
+    "start": "node index.js",							// Démarrage simple
+    "watch": "nodemon --exec babel-node index.js",		// Redémarrage automatique si on change un fichier
+      
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+    
+  
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/core": "^7.20.12",
+    "@babel/node": "^7.20.7",
+    "@babel/preset-env": "^7.20.2",
+    "body-parser": "^1.20.1",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "nodemon": "^2.0.20"
+  }
+}
+
+```
+
+
+
+et créer le fichier `index.js` à la racine du projet
+
+```javascript
+import express, { json } from "express";
+import cors from "cors";
+
+const app = express();
+const port = 8080;
+
+// Ajout des middlewares:
+app.use(json());				// Transforme automatiquement l'output en json
+app.use(cors(/*corsOptions*/))	// Autorise les CORS (pas besoin d'options dans notre cas)
+
+
+app.get("/", async (req, res) => { // on reçoit la requête et la réponse en paramètre
+  // ...
+  res.json(data);
+});
+
+app.listen(port, () => {
+  // Code a exécuter quand l'application démarre.
+  console.log(`API listening on port ${port}`)
+})
+```
+
+
+
+#### Alternative: Express-generator
+
+On va utiliser [express-generator](https://expressjs.com/en/starter/generator.html) pour génerer un projet de 0
+
+```bash
+npm install -g express-generator
+```
+
+Pour créer le projet "myapp":
+
+```bash
+express myapp
+```
+
+Nb: Cela génère un projet avec les import `commonjs` au lieu d'ES6
+
+```javascript
+var express = require('express'); // au lieu de `import express from "express";`
+```
+
+
+
+## CORS
+
+On va, en tout cas en développement, avoir 2 serveurs:
+
+* frontend: React
+  Nb: En développement, React tourne avec son propre serveur de développement, ce n'est pas express qui distribue l'application
+* backend: express
